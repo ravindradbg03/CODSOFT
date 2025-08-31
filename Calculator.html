@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Basic Calculator</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+            font-family: Arial, sans-serif;
+        }
+
+        .calculator {
+            background-color: #fff;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            width: 300px;
+            padding: 20px;
+            display: grid;
+            grid-template-rows: auto 1fr;
+            gap: 10px;
+        }
+
+        .display {
+            background-color: #222;
+            color: #fff;
+            font-size: 2em;
+            padding: 10px;
+            text-align: right;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .buttons {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+        }
+
+        button {
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1.5em;
+            padding: 15px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        button:hover {
+            background-color: #e0e0e0;
+        }
+
+        button.operator {
+            background-color: #ff9500;
+            color: #fff;
+        }
+
+        button.operator:hover {
+            background-color: #e68900;
+        }
+
+        button.equals {
+            background-color: #4cd964;
+            color: #fff;
+            grid-column: span 2;
+        }
+
+        button.equals:hover {
+            background-color: #3cb853;
+        }
+
+        button.clear {
+            background-color: #ff3b30;
+            color: #fff;
+            grid-column: span 2;
+        }
+
+        button.clear:hover {
+            background-color: #e53228;
+        }
+    </style>
+</head>
+<body>
+    <div class="calculator">
+        <div class="display" id="display">0</div>
+        <div class="buttons">
+            <button class="clear" id="clear">C</button>
+            <button class="operator" data-op="/">/</button>
+            <button class="operator" data-op="*">*</button>
+            <button>7</button>
+            <button>8</button>
+            <button>9</button>
+            <button class="operator" data-op="-">-</button>
+            <button>4</button>
+            <button>5</button>
+            <button>6</button>
+            <button class="operator" data-op="+">+</button>
+            <button>1</button>
+            <button>2</button>
+            <button>3</button>
+            <button class="equals" id="equals">=</button>
+            <button>0</button>
+            <button>.</button>
+        </div>
+    </div>
+
+    <script>
+        const display = document.getElementById('display');
+        const clearBtn = document.getElementById('clear');
+        const equalsBtn = document.getElementById('equals');
+        const buttons = document.querySelectorAll('.buttons button:not(#clear):not(#equals)');
+
+        let currentInput = '0';
+        let previousInput = '';
+        let operator = '';
+        let shouldResetDisplay = false;
+
+        // Function to update display
+        function updateDisplay() {
+            display.textContent = currentInput || '0';
+        }
+
+        // Event listener for number and decimal buttons
+        buttons.forEach(button => {
+            if (!button.classList.contains('operator')) {
+                button.addEventListener('click', () => {
+                    if (shouldResetDisplay) {
+                        currentInput = '';
+                        shouldResetDisplay = false;
+                    }
+                    if (button.textContent === '.' && currentInput.includes('.')) return;
+                    currentInput = currentInput === '0' ? button.textContent : currentInput + button.textContent;
+                    updateDisplay();
+                });
+            }
+        });
+
+        // Event listener for operator buttons
+        document.querySelectorAll('button.operator').forEach(button => {
+            button.addEventListener('click', () => {
+                if (previousInput && operator && !shouldResetDisplay) {
+                    calculate();
+                }
+                previousInput = currentInput;
+                operator = button.dataset.op;
+                shouldResetDisplay = true;
+            });
+        });
+
+        // Equals button
+        equalsBtn.addEventListener('click', () => {
+            if (previousInput && operator) {
+                calculate();
+                operator = '';
+                previousInput = '';
+                shouldResetDisplay = true;
+            }
+        });
+
+        // Clear button
+        clearBtn.addEventListener('click', () => {
+            currentInput = '0';
+            previousInput = '';
+            operator = '';
+            shouldResetDisplay = false;
+            updateDisplay();
+        });
+
+        // Calculation function using if-else for operators
+        function calculate() {
+            let prev = parseFloat(previousInput);
+            let curr = parseFloat(currentInput);
+            let result = 0;
+
+            if (isNaN(prev) || isNaN(curr)) return;
+
+            if (operator === '+') {
+                result = prev + curr;
+            } else if (operator === '-') {
+                result = prev - curr;
+            } else if (operator === '*') {
+                result = prev * curr;
+            } else if (operator === '/') {
+                if (curr === 0) {
+                    result = 'Error';
+                } else {
+                    result = prev / curr;
+                }
+            }
+
+            currentInput = result.toString();
+            updateDisplay();
+        }
+
+        // Note: Loops are not directly used here as the operations are simple binary calculations.
+        // However, if we were to handle more complex expressions with multiple operators,
+        // we could use loops to iterate through an array of inputs and operators.
+    </script>
+</body>
+</html>
